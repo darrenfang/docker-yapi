@@ -1,0 +1,34 @@
+name: Build
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    
+    runs-on: ubuntu-latest
+    
+    steps:
+      -
+        uses: actions/checkout@v1
+
+      -
+        name: login to Docker repository
+        run: docker login --username=${{ secrets.DOCKER_USERNAME }} -p=${{ secrets.DOCKER_PASSWORD }}
+      
+      -
+        name: build docker images
+        run: docker build --build-arg VERSION=${{ secrets.VERSION }} -t darrenfang/docker-yapi .
+      
+      -
+        name: tag docker images
+        run: docker tag darrenfang/docker-yapi darrenfang/docker-yapi:${{ secrets.VERSION }}
+
+      -
+        name: push latest docker images
+        run: docker push darrenfang/docker-yapi
+
+      -
+        name: push tagged docker images
+        run: docker push darrenfang/docker-yapi:${{ secrets.VERSION }}
